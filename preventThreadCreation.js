@@ -66,7 +66,7 @@ module.exports = async function ({ config, hooks }) {
         return;
     }
 
-    hooks.beforeNewThread = ({ message, cancel }) => {
+    hooks.beforeNewThread(({ message, cancel }) => {
         if (!message || message.content.trim().length < 1) {
             return;
         }
@@ -85,7 +85,7 @@ module.exports = async function ({ config, hooks }) {
                 return;
             }
         }
-    };
+    });
 
     log(`Prevent Thread Creation plugin engaged. Configured strings:\n${ignoredStartsWith.join('\n')}`);
 };
