@@ -1,0 +1,19 @@
+{
+  "name": "prevent-thread-creation",
+  "version": "1.0.0",
+  "description": "A plugin for Discord ModMail by Dragory that prevents thread creation when configurable conditions are met",
+  "main": "./preventThreadCreation.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StariusTechnologies/MMPreventThreadCreation.git"
+  },
+  "keywords": [
+    "modmail",
+    "plugin"
+  ],
+  "author": "Lily Wonhalf <lilywonhalf@gmail.com>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/StariusTechnologies/MMPreventThreadCreation/issues"
+  }
+}
