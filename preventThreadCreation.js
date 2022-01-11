@@ -26,14 +26,12 @@ module.exports = async function ({ config, hooks }) {
     const SETTING_NAMES = Object.freeze({
         IGNORED_STARTS_WITH: 'ignoredStartsWith',
         CASE_SENSITIVE: 'caseSensitive',
-        DEBUG: 'debug',
     });
 
     // Init with defaults
     const settings = new Map([
         [SETTING_NAMES.IGNORED_STARTS_WITH, []],
         [SETTING_NAMES.CASE_SENSITIVE, false],
-        [SETTING_NAMES.DEBUG, false],
     ]);
 
     // Load config settings
@@ -59,7 +57,6 @@ module.exports = async function ({ config, hooks }) {
 
     const ignoredStartsWith = settings.get(SETTING_NAMES.IGNORED_STARTS_WITH);
     const caseSensitive = settings.get(SETTING_NAMES.CASE_SENSITIVE);
-    const debug = settings.get(SETTING_NAMES.DEBUG);
 
     if (ignoredStartsWith.length < 1) {
         log(`Prevent Thread Creation plugin disengaged, no configuration provided.`);
@@ -76,10 +73,6 @@ module.exports = async function ({ config, hooks }) {
         for (const ignoredOccurrence of ignoredStartsWith) {
             const occurrence = caseSensitive ? ignoredOccurrence : ignoredOccurrence.toLowerCase();
 
-            if (debug) {
-                log(`${content.startsWith(occurrence) ? 'P' : 'Not p'}reventing new thread creation`);
-            }
-
             if (content.startsWith(occurrence)) {
                 cancel();
                 return;
@@ -87,5 +80,5 @@ module.exports = async function ({ config, hooks }) {
         }
     });
 
-    log(`Prevent Thread Creation plugin engaged${debug ? ' with debug mode on' : ''}. Configured strings:\n${ignoredStartsWith.join('\n')}`);
+    log(`Prevent Thread Creation plugin engaged. Configured strings:\n${ignoredStartsWith.join('\n')}`);
 };
