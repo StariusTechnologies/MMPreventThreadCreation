@@ -87,5 +87,5 @@ module.exports = async function ({ config, hooks }) {
         }
     });
 
-    log(`Prevent Thread Creation plugin engaged. Configured strings:\n${ignoredStartsWith.join('\n')}`);
+    log(`Prevent Thread Creation plugin engaged${debug ? ' with debug mode on' : ''}. Configured strings:\n${ignoredStartsWith.join('\n')}`);
 };
