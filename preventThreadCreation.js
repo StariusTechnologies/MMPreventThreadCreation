@@ -59,6 +59,7 @@ module.exports = async function ({ config, hooks }) {
     const caseSensitive = settings.get(SETTING_NAMES.CASE_SENSITIVE);
 
     if (ignoredStartsWith.length < 1) {
+        log(`Prevent Thread Creation plugin disengaged, no configuration provided.`);
         return;
     }
 
@@ -78,4 +79,6 @@ module.exports = async function ({ config, hooks }) {
             }
         }
     };
+
+    log(`Prevent Thread Creation plugin engaged. Configured strings:\n${ignoredStartsWith.join('\n')}`);
 };
