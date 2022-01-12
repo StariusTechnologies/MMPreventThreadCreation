@@ -63,7 +63,7 @@ module.exports = async function ({ config, hooks }) {
         return;
     }
 
-    hooks.beforeNewThread(({ message, cancel }) => {
+    const beforeMessage = ({ message, cancel }) => {
         if (!message || message.content.trim().length < 1) {
             return;
         }
@@ -78,7 +78,10 @@ module.exports = async function ({ config, hooks }) {
                 return;
             }
         }
-    });
+    };
+
+    hooks.beforeNewThread(beforeMessage);
+    hooks.beforeNewMessageReceived(beforeMessage);
 
     log(`Prevent Thread Creation plugin engaged. Configured strings:\n${ignoredStartsWith.join('\n')}`);
 };
