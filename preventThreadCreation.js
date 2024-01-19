@@ -99,7 +99,7 @@ module.exports = async function ({ config, hooks }) {
         }
 
         if (!await checkPresenceInServers(user, client)) {
-            log(`User ${user.tag} is not in any of the servers`);
+            log(`User ${user.username} is not in any of the servers`);
             cancel();
 
             return;
