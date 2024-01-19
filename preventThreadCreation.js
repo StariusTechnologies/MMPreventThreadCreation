@@ -66,7 +66,7 @@ module.exports = async function ({ config, hooks }) {
         return;
     }
 
-    const checkPresenceInServers = async (user) => {
+    const checkPresenceInServers = async (user, message) => {
         if (preventIfNotInServers.length < 1) {
             return true;
         }
@@ -98,7 +98,7 @@ module.exports = async function ({ config, hooks }) {
             return;
         }
 
-        if (!await checkPresenceInServers(user)) {
+        if (!await checkPresenceInServers(user, message)) {
             log(`User ${user.tag} is not in any of the servers`);
             cancel();
 
