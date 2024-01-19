@@ -1,5 +1,5 @@
 module.exports = async function ({ config, hooks }) {
-    const KEY = 'pec';
+    const KEY = 'ptc';
     const truthyValues = ['on', '1', 'true'];
     const falsyValues = ['off', '0', 'false', 'null'];
 
@@ -24,13 +24,15 @@ module.exports = async function ({ config, hooks }) {
     }
 
     const SETTING_NAMES = Object.freeze({
-        IGNORED_STARTS_WITH: 'ignoredStartsWith',
+        PREVENT_IF_NOT_IN_SERVERS: 'preventIfNotInServers',
+        PREVENT_IF_STARTS_WITH: 'preventIfStartsWith',
         CASE_SENSITIVE: 'caseSensitive',
     });
 
     // Init with defaults
     const settings = new Map([
-        [SETTING_NAMES.IGNORED_STARTS_WITH, []],
+        [SETTING_NAMES.PREVENT_IF_NOT_IN_SERVERS, []],
+        [SETTING_NAMES.PREVENT_IF_STARTS_WITH, []],
         [SETTING_NAMES.CASE_SENSITIVE, false],
     ]);
 
@@ -55,33 +57,61 @@ module.exports = async function ({ config, hooks }) {
         }
     }
 
-    const ignoredStartsWith = settings.get(SETTING_NAMES.IGNORED_STARTS_WITH);
+    const preventIfNotInServers = settings.get(SETTING_NAMES.PREVENT_IF_NOT_IN_SERVERS);
+    const preventIfStartsWithCharacters = settings.get(SETTING_NAMES.PREVENT_IF_STARTS_WITH);
     const caseSensitive = settings.get(SETTING_NAMES.CASE_SENSITIVE);
 
-    if (ignoredStartsWith.length < 1) {
+    if (preventIfNotInServers.length < 1 && preventIfStartsWithCharacters.length < 1) {
         log(`Prevent Thread Creation plugin disengaged, no configuration provided.`);
         return;
     }
 
-    const beforeMessage = ({ message, cancel }) => {
+    const checkPresenceInServers = async (user) => {
+        if (preventIfNotInServers.length < 1) {
+            return true;
+        }
+
+        const serversToCheck = preventIfNotInServers.map(id => message.client.guilds.cache.get(id));
+        const userInServers = await Promise.all(serversToCheck.map(
+            server => server.fetchMembers({userIDs: [user.id]})
+        ));
+
+        return userInServers.some(result => result.length > 0);
+    }
+
+    const checkMessageStartsWith = async (message) => {
+        const content = caseSensitive ? message.content : message.content.toLowerCase();
+
+        for (const preventOccurrence of preventIfStartsWithCharacters) {
+            const occurrence = caseSensitive ? preventOccurrence : preventOccurrence.toLowerCase();
+
+            if (content.startsWith(occurrence)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    const beforeMessage = async ({ user, message, cancel }) => {
         if (!message || message.content.trim().length < 1) {
             return;
         }
 
-        const content = caseSensitive ? message.content : message.content.toLowerCase();
+        if (!await checkPresenceInServers(user)) {
+            log(`User ${user.tag} is not in any of the servers`);
+            cancel();
 
-        for (const ignoredOccurrence of ignoredStartsWith) {
-            const occurrence = caseSensitive ? ignoredOccurrence : ignoredOccurrence.toLowerCase();
+            return;
+        }
 
-            if (content.startsWith(occurrence)) {
-                cancel();
-                return;
-            }
+        if (await checkMessageStartsWith(message)) {
+            cancel();
         }
     };
 
     hooks.beforeNewThread(beforeMessage);
     hooks.beforeNewMessageReceived(beforeMessage);
 
-    log(`Prevent Thread Creation plugin engaged. Configured strings:\n${ignoredStartsWith.join('\n')}`);
+    log(`Prevent Thread Creation plugin engaged. Configured strings:\n${preventIfStartsWithCharacters.join('\n')}`);
 };
