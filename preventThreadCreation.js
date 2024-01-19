@@ -66,17 +66,17 @@ module.exports = async function ({ config, hooks }) {
         return;
     }
 
-    const checkPresenceInServers = async (user, message) => {
+    const checkPresenceInServers = async (user, client) => {
         if (preventIfNotInServers.length < 1) {
             return true;
         }
 
-        const serversToCheck = preventIfNotInServers.map(id => message.client.guilds.cache.get(id));
-        const userInServers = await Promise.all(serversToCheck.map(
-            server => server.fetchMembers({userIDs: [user.id]})
+        const guildsToCheck = preventIfNotInServers.map(id => client.guilds.get(id));
+        const userInGuilds = await Promise.all(guildsToCheck.map(
+            guild => guild.fetchMembers({userIDs: [user.id]})
         ));
 
-        return userInServers.some(result => result.length > 0);
+        return userInGuilds.some(result => result.length > 0);
     }
 
     const checkMessageStartsWith = async (message) => {
@@ -93,12 +93,12 @@ module.exports = async function ({ config, hooks }) {
         return false;
     }
 
-    const beforeMessage = async ({ user, message, cancel }) => {
+    const beforeMessage = async ({ client, user, message, cancel }) => {
         if (!message || message.content.trim().length < 1) {
             return;
         }
 
-        if (!await checkPresenceInServers(user, message)) {
+        if (!await checkPresenceInServers(user, client)) {
             log(`User ${user.tag} is not in any of the servers`);
             cancel();
 
